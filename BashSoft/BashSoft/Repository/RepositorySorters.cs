@@ -13,9 +13,9 @@ namespace BashSoft
             {
                 //OrderAndTake(wantedData, studentsToTake, CompareInOrder); // Replaced by LINQ
                 PrintStudents(wantedData
-                             .OrderBy(x => x.Value.Sum())
-                             .Take(studentsToTake)
-                             .ToDictionary(pair => pair.Key, pair => pair.Value));
+                    .OrderBy(x => x.Value.Sum())
+                    .Take(studentsToTake)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value));
             }
             else if (comparison == "descending")
             {

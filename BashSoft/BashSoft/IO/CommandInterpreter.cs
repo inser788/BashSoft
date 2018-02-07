@@ -50,6 +50,7 @@ namespace BashSoft
             }
         }
 
+        
         private static void TryParseParametersForOrderAndTake(string takeCommand, string takeQuantity, string courseName, string comparison)
         {
             if (takeCommand == "take")
