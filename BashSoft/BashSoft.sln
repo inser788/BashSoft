@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BashSoft", "BashSoft\BashSoft.csproj", "{E4AC85C7-D83E-47B1-BD9C-E04A4846D097}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BashSoft", "BashSoft\BashSoft.csproj", "{A38EBC12-5551-4ADB-A234-2A858B3A6376}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E4AC85C7-D83E-47B1-BD9C-E04A4846D097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4AC85C7-D83E-47B1-BD9C-E04A4846D097}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4AC85C7-D83E-47B1-BD9C-E04A4846D097}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4AC85C7-D83E-47B1-BD9C-E04A4846D097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A38EBC12-5551-4ADB-A234-2A858B3A6376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A38EBC12-5551-4ADB-A234-2A858B3A6376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A38EBC12-5551-4ADB-A234-2A858B3A6376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A38EBC12-5551-4ADB-A234-2A858B3A6376}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
