@@ -2,21 +2,25 @@
 
 namespace BashSoft
 {
-    public static class InputReader
+    public class InputReader
     {
         private const string endCommand = "quit";
+        private CommandInterpreter interpreter;
 
-        public static void StartReadingCommands()
+        public InputReader(CommandInterpreter interpreter)
         {
-            OutputWriter.WriteMessage($"{SessionData.currentPath}> ");
-            string input = Console.ReadLine();
+            this.interpreter = interpreter;
+        }
 
-            while (input != endCommand)
+        public void StartReadingCommands()
+        {
+            while (true)
             {
-                CommandInterpreter.IntepredCommand(input);
                 OutputWriter.WriteMessage($"{SessionData.currentPath}> ");
-                input = Console.ReadLine();
-                input = input.Trim();
+                string input = Console.ReadLine().Trim();
+                if (input == endCommand) break;
+
+                this.interpreter.IntepredCommand(input);
             }
         }
     }

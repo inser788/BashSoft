@@ -1,280 +1,69 @@
-﻿using System.Diagnostics;
+﻿using BashSoft.Exceptions;
+using BashSoft.IO.Commands;
+using System;
 
 namespace BashSoft
 {
-    public static class CommandInterpreter
+    public class CommandInterpreter
     {
-        public static void IntepredCommand(string input)
+        private Tester judge;
+        private StudentsRepository repository;
+        private IOManager inputOutputManager;
+
+        public CommandInterpreter(Tester judge, StudentsRepository repository, IOManager inputOutputManager)
+        {
+            this.judge = judge;
+            this.repository = repository;
+            this.inputOutputManager = inputOutputManager;
+        }
+
+        public void IntepredCommand(string input)
         {
             string[] data = input.Split(' ');
-            string command = data[0];
+            string commandName = data[0].ToLower();
+
+            try
+            {
+                Command command = this.ParseCommand(input, commandName, data);
+                command.Execute();
+            }
+            catch (Exception ex)
+            {
+                OutputWriter.DisplayException(ex.Message);
+            }
+        }
+
+        private Command ParseCommand(string input, string command, string[] data)
+        {
             switch (command)
             {
-                case "open": TryOpenFile(input, data); break;
-                case "mkdir": TryCreateDirectory(input, data); break;
-                case "ls": TryTraverseFolders(input, data); break;
-                case "cmp": TryComparеFiles(input, data); break;
-                case "cdRel": TryChangePathRelatively(input, data); break;
-                case "cdAbs": TryChangePathAbsolute(input, data); break;
-                case "readDb": TryReadDatabaseFromFile(input, data); break;
-                case "help": TryGetHelp(); break;
-                case "show": TryShowWantedData(input, data); break;
-                case "filter": TryFilterAndTake(input, data); break;
-                case "order": TryOrderAndTake(input, data); break;
-                //case "download": TryDownloadRequestedFile(input, data); break;
-                //case "downloadAsynch": TryDownloadRequestedFileAsync(input, data); break;
-                default: DisplayInvalidCommandMessage(input); break;
+                case "open":
+                    return new OpenFileCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "mkdir":
+                    return new MakeDirectoryCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "ls":
+                    return new TraverseFoldersCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "cmp":
+                    return new CompareFilesCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "cdrel":
+                    return new ChangeRelativePathCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "cdabs":
+                    return new ChangeAbsolutePathCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "readdb":
+                    return new ReadDatabaseCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "help":
+                    return new GetHelpCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "show":
+                    return new ShowCourseCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "filter":
+                    return new PrintFilteredStudentsCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "order":
+                    return new PrintOrderedStudentsCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                case "dropdb":
+                    return new DropDatabaseCommand(input, data, this.judge, this.repository, this.inputOutputManager);
+                default:
+                    throw new InvalidCommandException(input);
             }
-        }
-
-        private static void DisplayInvalidCommandMessage(string input)
-        {
-            OutputWriter.DisplayException(string.Format(ExceptionMessages.InvalidCommand, input));
-        }
-
-        // order courseName ascending/descending take 3/26/52/all
-        private static void TryOrderAndTake(string input, string[] data)
-        {
-            if (data.Length == 5)
-            {
-                string courseName = data[1];
-                string comparison = data[2].ToLower();
-                string takeCommand = data[3].ToLower();
-                string takeQuantity = data[4].ToLower();
-
-                TryParseParametersForOrderAndTake(takeCommand, takeQuantity, courseName, comparison);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        
-        private static void TryParseParametersForOrderAndTake(string takeCommand, string takeQuantity, string courseName, string comparison)
-        {
-            if (takeCommand == "take")
-            {
-                if (takeQuantity == "all")
-                {
-                    StudentsRepository.OrderAndTake(courseName, comparison);
-                }
-                else
-                {
-                    int studentsToTake;
-                    bool hasParsed = int.TryParse(takeQuantity, out studentsToTake);
-                    if (hasParsed)
-                    {
-                        StudentsRepository.OrderAndTake(courseName, comparison, studentsToTake);
-                    }
-                    else
-                    {
-                        OutputWriter.DisplayException(ExceptionMessages.InvalidTakeQuantityParameter);
-                    }
-                }
-            }
-            else
-            {
-                OutputWriter.DisplayException(ExceptionMessages.InvalidTakeQuantityParameter);
-            }
-        }
-
-        // filter courseName poor/average/excellent take 3/26/52/all
-        private static void TryFilterAndTake(string input, string[] data)
-        {
-            if (data.Length == 5)
-            {
-                string courseName = data[1];
-                string filter = data[2].ToLower();
-                string takeCommand = data[3].ToLower();
-                string takeQuantity = data[4].ToLower();
-
-                TryParseParametersForFilterAndTake(takeCommand, takeQuantity, courseName, filter);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        private static void TryParseParametersForFilterAndTake(string takeCommand, string takeQuantity, string courseName, string filter)
-        {
-            if (takeCommand == "take")
-            {
-                if (takeQuantity == "all")
-                {
-                    StudentsRepository.FilterAndTake(courseName, filter);
-                }
-                else
-                {
-                    int studentsToTake;
-                    bool hasParsed = int.TryParse(takeQuantity, out studentsToTake);
-
-                    if (hasParsed)
-                    {
-                        StudentsRepository.FilterAndTake(courseName, filter, studentsToTake);
-                    }
-                    else
-                    {
-                        OutputWriter.DisplayException(ExceptionMessages.InvalidTakeQuantityParameter);
-                    }
-                }
-            }
-            else
-            {
-                OutputWriter.DisplayException(ExceptionMessages.InvalidTakeQuantityParameter);
-            }
-        }
-
-        // show courseName [username] => NB. username is optional
-        private static void TryShowWantedData(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string courseName = data[1];
-                StudentsRepository.GetAllStudentsFromCourse(courseName);
-            }
-            else if (data.Length == 3)
-            {
-                string courseName = data[1];
-                string userName = data[2];
-                StudentsRepository.GetStudentScoresFromCourse(courseName, userName);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // help
-        private static void TryGetHelp()
-        {
-            OutputWriter.WriteMessageOnNewLine($"{new string('_', 100)}");
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "make directory - mkdir: path "));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "traverse directory - ls: depth "));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "comparing files - cmp: path1 path2"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "change directory - cdRel: relative path"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "change directory - cdAbs: absolute path"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "read students data base - readDb: path"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "filter {courseName} excelent/average/poor take 2/5/all students - filterExcelent (the output is written on the console)"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "order students - order {courseName} ascending/descending take 20/10/all (the output is written on the console)"));
-            //OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "download file - download: path of file (saved in current directory)"));
-            //OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "download file asinchronously - downloadAsynch: path of file (save in the current directory)"));
-            OutputWriter.WriteMessageOnNewLine(string.Format("|{0, -98}|", "get help – help"));
-            OutputWriter.WriteMessageOnNewLine($"{new string('_', 100)}");
-            OutputWriter.WriteEmptyLine();
-        }
-
-        // readDb dbFileName
-        private static void TryReadDatabaseFromFile(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string fileName = data[1];
-                StudentsRepository.InitializeData(fileName);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // cdAbs absolutePath
-        private static void TryChangePathAbsolute(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string absPath = data[1];
-                IOManager.ChangeCurrentDirectoryAbsolute(absPath);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // cdRel relativePath
-        private static void TryChangePathRelatively(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string relPath = data[1];
-                IOManager.ChangeCurrentDirectoryRelative(relPath);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // cmp absolutePath1 absolutePath2
-        private static void TryComparеFiles(string input, string[] data)
-        {
-            if (data.Length == 3)
-            {
-                string firstPath = data[1];
-                string secondPath = data[2];
-                Tester.CompareContent(firstPath, secondPath);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // ls
-        private static void TryTraverseFolders(string input, string[] data)
-        {
-            if (data.Length == 1)
-            {
-                IOManager.TraverseDirectory(0);
-            }
-            else if (data.Length == 2)
-            {
-                int depth;
-                bool hasParsed = int.TryParse(data[1], out depth);
-
-                if (hasParsed)
-                {
-                    IOManager.TraverseDirectory(depth);
-                }
-                else
-                {
-                    OutputWriter.DisplayException(ExceptionMessages.UnableToParseNumber);
-                }
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // mkdir directoryName
-        private static void TryCreateDirectory(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string folderName = data[1];
-                IOManager.CreateDirectoryInCurrentFolder(folderName);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
-
-        // open fileName
-        private static void TryOpenFile(string input, string[] data)
-        {
-            if (data.Length == 2)
-            {
-                string fileName = data[1];
-                Process.Start(SessionData.currentPath + "\\" + fileName);
-            }
-            else
-            {
-                DisplayInvalidCommandMessage(input);
-            }
-        }
+        }     
     }
 }
