@@ -1,13 +1,15 @@
-﻿using System;
-
-namespace BashSoft
+﻿namespace BashSoft
 {
-    public class InputReader
-    {
-        private const string endCommand = "quit";
-        private CommandInterpreter interpreter;
+    using System;
+    using BashSoft.Contracts;
 
-        public InputReader(CommandInterpreter interpreter)
+    public class InputReader : IReader
+    {
+        private const string EndCommand = "quit";
+
+        private IInterpreter interpreter;
+
+        public InputReader(IInterpreter interpreter)
         {
             this.interpreter = interpreter;
         }
@@ -16,11 +18,14 @@ namespace BashSoft
         {
             while (true)
             {
-                OutputWriter.WriteMessage($"{SessionData.currentPath}> ");
+                OutputWriter.WriteMessage($"{SessionData.CurrentPath}> ");
                 string input = Console.ReadLine().Trim();
-                if (input == endCommand) break;
+                if (input == EndCommand)
+                {
+                    break;
+                }
 
-                this.interpreter.IntepredCommand(input);
+                this.interpreter.InterpretCommand(input);
             }
         }
     }

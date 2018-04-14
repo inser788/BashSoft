@@ -1,51 +1,54 @@
-﻿using BashSoft.Exceptions;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace BashSoft.Models
+﻿namespace BashSoft.Models
 {
-    public class Student
+    using System.Collections.Generic;
+    using System.Linq;
+    using BashSoft.Contracts;
+    using BashSoft.Exceptions;
+
+    public class SoftUniStudent : IStudent
     {
         private string userName;
-        private Dictionary<string, Course> enrolledCourses;
+        private Dictionary<string, ICourse> enrolledCourses;
         private Dictionary<string, double> marksByCourseName;
 
-        public Student(string userName)
+        public SoftUniStudent(string userName)
         {
             this.UserName = userName;
-            this.enrolledCourses = new Dictionary<string, Course>();
+            this.enrolledCourses = new Dictionary<string, ICourse>();
             this.marksByCourseName = new Dictionary<string, double>();
         }
 
         public string UserName
         {
-            get { return this.userName; }
+            get
+            {
+                return this.userName;
+            }
+
             private set
             {
                 if (string.IsNullOrEmpty(value))
                 {
                     throw new InvalidStringException();
                 }
+
                 this.userName = value;
             }
         }
 
-        public IReadOnlyDictionary<string, Course> EnrolledCourses
-        {
-            get { return this.enrolledCourses; }
-        }
+        public IReadOnlyDictionary<string, ICourse> EnrolledCourses => this.enrolledCourses;
 
-        public IReadOnlyDictionary<string, double> MarksByCourseName
-        {
-            get { return this.marksByCourseName; }
-        }
+        public IReadOnlyDictionary<string, double> MarksByCourseName => this.marksByCourseName;
 
-        public void EnrollInCourse(Course course)
+        public int CompareTo(IStudent other) => this.UserName.CompareTo(other.UserName);
+
+        public void EnrollInCourse(ICourse course)
         {
             if (this.EnrolledCourses.ContainsKey(course.Name))
             {
                 throw new DuplicateEntryInStructureException(this.UserName, course.Name);
             }
+
             this.enrolledCourses.Add(course.Name, course);
         }
 
@@ -55,17 +58,21 @@ namespace BashSoft.Models
             {
                 throw new CourseNotFoundException();
             }
-            if (scores.Length > Course.NumberOfTasksOnExam)
+
+            if (scores.Length > SoftUniCourse.NumberOfTasksOnExam)
             {
                 throw new InvalidNumberOfScoresException();
             }
-            this.marksByCourseName.Add(courseName, CalculateMark(scores));
+
+            this.marksByCourseName.Add(courseName, this.CalculateMark(scores));
         }
+
+        public override string ToString() => this.UserName;
 
         private double CalculateMark(int[] scores)
         {
-            double percntageOfSolvedExam = scores.Sum() / (double)(Course.NumberOfTasksOnExam * Course.MaxScoreOnExamTask);
-            double mark = percntageOfSolvedExam * 4 + 2;
+            double percentageOfSolvedExam = scores.Sum() / (double)(SoftUniCourse.NumberOfTasksOnExam * SoftUniCourse.MaxScoreOnExamTask);
+            double mark = (percentageOfSolvedExam * 4) + 2;
 
             return mark;
         }
